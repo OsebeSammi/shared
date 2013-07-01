@@ -1,5 +1,5 @@
 ﻿<style type="text/css" media="screen">
-p{color:blue;text-decoration:underline;pointer:cursor;}
+p{color:blue;text-decoration:underline;cursor:pointer;}
 
 /* Put your CSS styling here */
 
@@ -14,8 +14,7 @@ p{color:blue;text-decoration:underline;pointer:cursor;}
 	{
 	   	$.get(theId,function(data)
 	   	{
-	   		//alert(data);
-	   		$("#child").innerHTML(data);
+	   		document.getElementById('child').innerHTML=data;
 	   	});
 	}   
 	   	
@@ -41,14 +40,14 @@ p{color:blue;text-decoration:underline;pointer:cursor;}
 </script>
 
 
-<div style="float:left;">
+<div style="float:left;height:100%;">
 <label for="search">Search Criteria</label>
 <input type="text" id="search" class="search" />
 <div id="results"></div>
 </div>
 
 </body>
-<div id="child">
+<div id="child" style="position:absolute;left:50%;">
 
 </div>
 <body>
