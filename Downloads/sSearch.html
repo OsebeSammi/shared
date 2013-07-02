@@ -22,6 +22,7 @@ p{color:blue;text-decoration:underline;cursor:pointer;}
                 
                 $("#search").keyup(function(){
                         $("#results").html("");
+                        $("#child").html("");
                         $.get('../api/indicatorGroups/query/'+$(this).val()+'.json', function(json)
                         {
                                 $(json.indicatorGroups).each(function(i, data)
