@@ -1,5 +1,5 @@
 ﻿<style type="text/css" media="screen">
-p{color:blue;text-decoration:underline;cursor:pointer;}
+.blue{color:blue;text-decoration:underline;cursor:pointer;}
 
 /* Put your CSS styling here */
 
@@ -8,13 +8,20 @@ p{color:blue;text-decoration:underline;cursor:pointer;}
 
 
 <script type="text/javascript">
-	   var theId;	
-
-	function printIt()
+	   var theId,id;	
+	
+	function printIt(id)
 	{
-	   	$.get(theId,function(data)
-	   	{
-	   		document.getElementById('child').innerHTML=data;
+		$("#child").html("");
+		
+	   	$.get(id+'.json',function(json)
+	   	{ 
+	   	    $(json.indicators).each(function(i, data)
+                                {
+                                	if(data.name==""){$("#child").html("<p style='color:grey;'>no indicators</p>");}
+                                        var anchor = $("<p></p>").html(data.name);
+                                        $("#child").append(anchor);
+                                });
 	   	});
 	}   
 	   	
@@ -27,8 +34,9 @@ p{color:blue;text-decoration:underline;cursor:pointer;}
                         {
                                 $(json.indicatorGroups).each(function(i, data)
                                 {
-                                        var anchor = $("<p onclick='javascript:printIt()'></p>").append(data.name);
-                                        theId=data.href;
+                                	theId=data.href;
+                                        var anchor = $("<p class='blue' id='"+theId+"' onclick='javascript:printIt(id)'></p>").append(data.name);
+                                        
                                         $("#results").append(anchor);
                                         
                                 });
@@ -40,15 +48,12 @@ p{color:blue;text-decoration:underline;cursor:pointer;}
         });
 </script>
 
-
+<h1>Group 3 Search</h1>
 <div style="float:left;height:100%;">
 <label for="search">Search Criteria</label>
 <input type="text" id="search" class="search" />
 <div id="results"></div>
 </div>
 
-</body>
 <div id="child" style="position:absolute;left:50%;">
-
 </div>
-<body>
