@@ -1,0 +1,104 @@
+
+<html>
+
+<head>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+﻿<style type="text/css" media="screen">
+.blue{color:blue;text-decoration:underline;cursor:pointer;}
+p{cursor:pointer;}
+/* Put your CSS styling here */
+
+
+</style>
+
+
+<script type="text/javascript">
+	   var theId,id,myId,mapId;	
+	
+	function printDetails(myId)
+	{
+		
+		$.get("../../../api/mapViews.json",function(map)
+		{
+			
+			$(map.mapViews).each(function(i, myData)
+			{	
+				
+				$.get("../../../api/mapViews/"+myData.id+".json",function(mapRef)
+				{
+    					
+					$(mapRef.indicator).each(function(i,mapIndicatorId)
+					{
+						
+						
+						if(myId==mapIndicatorId.id)
+						{
+							//$("#maps").append("<img src='"+mapRef.href+"/data'">);
+							var image=$("<img >").attr("Src",mapRef.href+'/data').append("<br />"); 
+							$("#maps").append(image);
+						}
+						
+					});
+				});
+			});
+		});
+	}
+	
+	function printIt(id)
+	{
+		$("#child").html("");
+		
+	   	$.get(id+'.json',function(json)
+	   	{ 
+	   	    $(json.indicators).each(function(i, data)
+                                {
+                                	if(data.name==""){$("#child").html("<p style='color:grey;'>no indicators</p>");}
+                                	var details=data.id;
+                                        var anchor = $("<p id='"+details+"' onclick='Javascript:printDetails(id)'></p>").html(data.name);
+                                        $("#child").append(anchor);
+                                });
+	   	});
+	}   
+	   	
+        $(document).ready(function(){
+                
+                $("#search").keyup(function(){
+                        $("#results").html("");
+                        $("#child").html("");
+                        $.get('../../../api/indicatorGroups/query/'+$(this).val()+'.json', function(json)
+                        {
+                                $(json.indicatorGroups).each(function(i, data)
+                                {
+                                	theId=data.href;
+                                        var anchor = $("<p class='blue' id='"+theId+"' onclick='javascript:printIt(id)'></p>").append(data.name);
+                                        
+                                        $("#results").append(anchor);
+                                        
+                                });
+                        });
+                        
+                });
+                
+                
+        });
+</script>
+</head>
+
+<body>
+<h1>Group 3 Search</h1>
+<div style="width:100%;height:200%;">
+<div style="float:left;">
+<label for="search">Search Criteria</label>
+<input type="text" id="search" class="search" />
+<div id="results"></div>
+</div>
+
+<div id="child" style="position:absolute;left:50%;">
+</div>
+<div id="more">
+</div>
+</div>
+<div id="maps" style=""></div>
+</body>
+</html>
