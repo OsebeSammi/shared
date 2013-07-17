@@ -1,19 +1,16 @@
-<html>
-	<head>
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
-		
 		<style>
 		`
 			h2
 			{
 				text-align: center;
-				background: blue;
+				
 			}
 
 			h3
 			{
 				text-align: center;
-				background: blue;
+				
 			}
 
 			button
@@ -27,225 +24,143 @@
 
 		<script type="text/javascript">
 
-				var dataElementsArray = new Array();
-				var indicatorsArray = new Array();
-				var dataElementsUsedArray = new Array();
-				var dataElementsNotUsedArray = new Array();
-				var indicatorsUsedArray = new Array();
-				var indicatorsNotUsedArray = new Array();
+				var dataElementsArray = [];
+				var indicatorsArray = [];
+				var dataElementsUsedArray = [];
+				var dataElementsNotUsedArray = [];
+				var indicatorsUsedArray = [];
+				var indicatorsNotUsedArray = [];
+				var tempIndicators = [];
 
 				
 				//counters needed
 				var dataElementsNo,dataElementsUsedNo,dataElementsNotUsedNo;
 				var indicatorsNo,indicatorsUsedNo,indicatorsNotUsedNo;
-				var myIndex;
+				var myIndex=0;
 
 
-				//getting number of data elements and indicators
-					dataElementsNo=dataElementsArray.length;
-					indicatorsNo=indicatorsArray.length;
+				
 
 					
 
 				var counter=0;
+				populateArray();
 
+				
 				//getting a list of all indicators and data elements
 				function populateArray()
 				{
-					$.get("../../../api/dataElements.json",function(dataElements)
-						{
-							$(dataElements).each(function(i,data)
+					$.get("../api/dataElements.json",function(dataElements)
+						{ 
+							$(dataElements.dataElements).each(function(i,data)
 							{
 								dataElementsArray[counter]=data.name;
 								counter++;
 							});
 						});
-
-					counter=0;	
-
-					$.get("../../../api/indicators.json",function(indicators)
+					$(document).ajaxStop(function()
 						{
-							$(indicators).each(function(i,data)
+							counter=0;
+
+					$.get("../api/indicators.json",function(indicators)
+						{	
+							$(indicators.indicators).each(function(i,data)
 								{
+									
 									indicatorsArray[counter]=data.name;
+									
 									counter++;
 								});
 						});
-					alert(dataElementsArray.toString(),indicatorsArray.toString());
+
+						//getting number of data elements and indicators
+							dataElementsNo=dataElementsArray.length;
+							indicatorsNo=indicatorsArray.length;
+						});
+
+					
+					$(document).ajaxStop(function()
+						{
+							getCharts();
+						});
+					
 				}
 
-
+				
 				
 
 				//function for charts
 				function getCharts()
 				{
 					//getting data from charts and analysing
-					$.get("../../../api/charts.json",function(charts)
+					$.get("../api/charts.json",function(charts)
 						{	
-							var tempIndicators = new Array();
-							tempIndicators = indicatorsArray;
+							
+							tempIndicators = indicatorsArray.slice(0);
 
 							counter=0;
-							$(charts).each(function(i,myCharts)
+							$(charts.charts).each(function(i,myCharts)
 								{
 									$.get(myCharts.href+".json",function(data)
-										{
+										{	
 											$(data.indicators).each(function(i,data)
 												{
-													indicatorsUsedArray[counter]=data.name;
-													counter++;
-
-													myIndex=tempIndicators.indexOf(data.name);
-													tempIndicators.splice(myIndex,1);
-													$("#chartsIndicatorsUsed").append(data.name);
+													
+													
+														indicatorsUsedArray[counter]=data.name;
+														counter++;
+														
+														myIndex=tempIndicators.indexOf(data.name);
+														
+														
+														tempIndicators.splice(myIndex,1);
+														$("#chartsIndicatorsUsed").append(data.name+"<br>");
+													
+													
 												});
 											
 										});
 								});
 
-							$(tempIndicators).each(function(i,data)
-								{
-									$("#chartsIndicatorsNotUsed").append(data);
-								});
 						});
+					
+				$(document).ajaxStop(function()
+				{
+					$(tempIndicators).each(function(i,data)
+								{
+									$("#chartsIndicatorsNotUsed").append(data+"<br>");
+								});
+
+					
 					var percentIndicators=(counter/indicatorsNo)*100;
 					
 
-					$("charts").append("the percentage of indicators used is "+percentIndicators+"%");
-					$("charts").append("the percentage of indicators NOT used is "+(100-percentIndicators)+"%");
-				}
-
-				//function for getting indicators in map views
-				function getMaps()
-				{
-					//getting data from maps and analysing
-					$.get("../../../api/mapViews.json",function(maps)
-						{	
-							var tempIndicators = new Array();
-							tempIndicators = indicatorsArray;
-
-							counter=0;
-							$(maps).each(function(i,myMaps)
-								{
-									$.get(myMaps.href+".json",function(data)
-										{
-													indicatorsUsedArray[counter]=data.indicator.name;
-													counter++;
-
-												myIndex=tempIndicators.indexOf(data.indicator.name);
-													tempIndicators.splice(myIndex,1);
-													$("#mapViewsIndicatorsUsed").append(data.indicator.name);	
-										});
-								});
-
-							$(tempIndicators).each(function(i,data)
-								{
-									$("#mapViewsIndicatorsNotUse").append(data);
-								});
-						});
-					var percentIndicators=(counter/indicatorsNo)*100;
+					$("charts").append("<h4>the percentage of indicators used is "+percentIndicators+"%</h4>");
+					$("charts").append("<h4>the percentage of indicators NOT used is "+(100-percentIndicators)+"%</h4>");
+				});	
 					
 
-					$("#mapViews").append("the percentage of indicators used is "+percentIndicators+"%");
-					$("#mapViews").append("the percentage of indicators NOT used is "+(100-percentIndicators)+"%");
+					//getReportTables();
 				}
 
-
-				//getting dATa elements from report tables
-				function getReportTables()
-				{
-					//getting data from report tables and analysing
-
-					$.get("../../../api/reportTables.json",function(reports)
-						{	
-							
-							var tempIndicators = new Array();//tempIndicators is supposed to be tempDataElements
-							tempIndicators = dataElementsArray;
-
-							counter=0;
-							$(reports).each(function(i,myReports)
-								{
-									$.get(myReports.href+".json",function(data)
-										{
-											$(data.dataElements).each(function(i,data)
-												{
-													dataElementsUsedArray[counter]=data.name;
-													counter++;
-
-													myIndex=tempIndicators.indexOf(data.name);
-													tempIndicators.splice(myIndex,1);
-													$("#reportTablesElementsUsed").append(data.name);
-												});	
-										});
-								});
-
-							$(tempIndicators).each(function(i,data)
-								{
-									$("#reportTablesElementsNotUsed").append(data);
-								});
-						});
-					var percentDataElements=(counter/dataElementsNo)*100;
-					
-
-					$("#reportTables").append("the percentage of data elements used is "+percentDataElements+"%");
-					$("#reportTables").append("the percentage of data elements NOT used is "+(100-percentDataElements)+"%");
-				}
-
-				//getting data elements from sections
-				function getSections()
-				{
-										//getting data from report tables and analysing
-
-					$.get("../../../api/sections.json",function(sections)
-						{	
-							
-							var tempIndicators = new Array();//tempIndicators is supposed to be tempDataElements
-							tempIndicators = dataElementsArray;
-
-							counter=0;
-							$(sections).each(function(i,mySections)
-								{
-									$.get(mySections.href+".json",function(data)
-										{
-											$(data.dataElements).each(function(i,data)
-												{
-													dataElementsUsedArray[counter]=data.name;
-													counter++;
-
-													myIndex=tempIndicators.indexOf(data.name);
-													tempIndicators.splice(myIndex,1);
-													$("#sectionsElementsUsed").append(data.name);
-												});	
-										});
-								});
-
-							$(tempIndicators).each(function(i,data)
-								{
-									$("#sectionsElementsNotUsed").append(data);
-								});
-						});
-					var percentDataElements=(counter/dataElementsNo)*100;
-					
-
-					$("#sections").append("the percentage of data elements used is "+percentDataElements+"%");
-					$("#sections").append("the percentage of data elements NOT used is "+(100-percentDataElements)+"%");	
-				}
 
 				//doing lookups,analysing the dapercentDataElementstapercentDataElementsopulateArray();
 				function stats() 
 				{
+					//populating
+					populateArray();
+
 					//get indicators in charts
-					getCharts();
+					//getCharts();
 
 					//get indicators from maps
-					getMaps();
+					//getMaps();
 
 					//get data elements from report tables
-					getReportTables();
+					//getReportTables();
 
 					//get data elements from sections
-					getSections();
+					//getSections();
 				}
 					
 
@@ -253,21 +168,21 @@
 				
 		</script>
 
-	</head>
-	<body>
-		<h2>Statistical analysis of usage of indicators and data elements</h2>
+	
+		<h2 style="text-align:center;">Statistical analysis of usage of indicators and data elements</h2>
 		
 		<button onclick="javascript:stats();">RUN</button>
-		<div id="charts">
+		<div id="charts" style="width:100%;">
 				<h3>Charts</h3>
 				
-				<div id="chartsIndicatorsUsed" style="float:left;"></div>
-				<div id="chartsIndicatorsNotUsed" style="float:left;"></div>
-				<div id="chartsDataElementsUsed" style="float:right;"></div>
+				<div id="chartsIndicatorsUsed" style="float:left;"><h4>charts indicators used</h4></div>
+				<div id="chartsIndicatorsNotUsed" style="float:right;"><h4>charts indicators not used</h4></div>
+				<div id="chartsDataElementsUsed" style="float:right;"><h4></div>
 				<div id="chartsDataElementsNotUsed" style="float:right;"></div>
 
 		</div>
-		<div id="mapViews">
+		<br>
+		<div id="mapViews" style="width:100%;">
 			<h3>Map Views</h3>
 
 				<div id="mapViewsIndicatorsUsed" style="float:left;"></div>
@@ -276,19 +191,19 @@
 				<div id="mapViewsDataElementsNotUsed" style="float:right;"></div>
 
 		</div>
-		<div id="reportTables">
+		<br>
+		<div id="reportTables" style="width:100%;">
 			<h3>Reports</h3>
 
 				<div id="reportTablesElementsUsed" style="float:right;"></div>
 				<div id="reportTablesElementsNotUsed" style="float:right;"></div>	
 
 		</div>
-		<div id="sections">
+		<br>
+		<div id="sections" style="width:100%;">
 			<h3>Sections</h3>
 
 				<div id="sectionsElementsUsed" style="float:right;"></div>
 				<div id="sectionsElementsNotUsed" style="float:right;"></div>
 
 		</div>
-	</body>
-</html>
