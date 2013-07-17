@@ -144,6 +144,127 @@
 				}
 
 
+				//function for getting indicators in map views
+				function getMaps()
+				{
+					//getting data from maps and analysing
+					$.get("../api/mapViews.json",function(maps)
+						{	
+							var tempIndicators = [];
+							tempIndicators = indicatorsArray.slice(0);
+
+							counter=0;
+							$(maps.mapViews).each(function(i,myMaps)
+								{
+									$.get(myMaps.href+".json",function(data)
+										{
+													indicatorsUsedArray[counter]=data.indicator.name;
+													counter++;
+
+												myIndex=tempIndicators.indexOf(data.indicator.name);
+													tempIndicators.splice(myIndex,1);
+													$("#mapViewsIndicatorsUsed").append(data.indicator.name);	
+										});
+								});
+
+							$(tempIndicators).each(function(i,data)
+								{
+									$("#mapViewsIndicatorsNotUse").append(data);
+								});
+						});
+					var percentIndicators=(counter/indicatorsNo)*100;
+					
+
+					$("#mapViews").append("the percentage of indicators used is "+percentIndicators+"%");
+					$("#mapViews").append("the percentage of indicators NOT used is "+(100-percentIndicators)+"%");
+				}
+
+
+				//getting dATa elements from report tables
+				function getReportTables()
+				{
+					//getting data from report tables and analysing
+
+					$.get("../api/reportTables.json",function(reports)
+						{	
+							
+							var tempIndicators = new Array();//tempIndicators is supposed to be tempDataElements
+							tempIndicators = dataElementsArray;
+
+							counter=0;
+							$(reports.reportTables).each(function(i,myReports)
+								{
+									$.get(myReports.href+".json",function(data)
+										{
+											$(data.dataElements).each(function(i,data)
+												{
+													dataElementsUsedArray[counter]=data.name;
+													counter++;
+
+													myIndex=tempIndicators.indexOf(data.name);
+													tempIndicators.splice(myIndex,1);
+													$("#reportTablesElementsUsed").append(data.name);
+												});	
+										});
+								});
+
+							$(tempIndicators).each(function(i,data)
+								{
+									$("#reportTablesElementsNotUsed").append(data);
+								});
+						});
+					var percentDataElements=(counter/dataElementsNo)*100;
+					
+
+					$("#reportTables").append("the percentage of data elements used is "+percentDataElements+"%");
+					$("#reportTables").append("the percentage of data elements NOT used is "+(100-percentDataElements)+"%");
+
+					getSections();
+				}
+
+				//getting data elements from sections
+				function getSections()
+				{
+										//getting data from report tables and analysing
+
+					$.get("../api/sections.json",function(sections)
+						{	
+							
+							var tempIndicators = new Array();//tempIndicators is supposed to be tempDataElements
+							tempIndicators = dataElementsArray;
+
+							counter=0;
+							$(sections.sections).each(function(i,mySections)
+								{
+									$.get(mySections.href+".json",function(data)
+										{
+											$(data.dataElements).each(function(i,data)
+												{
+													dataElementsUsedArray[counter]=data.name;
+													counter++;
+
+													myIndex=tempIndicators.indexOf(data.name);
+													tempIndicators.splice(myIndex,1);
+													$("#sectionsElementsUsed").append(data.name);
+												});	
+										});
+								});
+
+							$(tempIndicators).each(function(i,data)
+								{
+									$("#sectionsElementsNotUsed").append(data);
+								});
+						});
+					var percentDataElements=(counter/dataElementsNo)*100;
+					
+
+					$("#sections").append("the percentage of data elements used is "+percentDataElements+"%");
+					$("#sections").append("the percentage of data elements NOT used is "+(100-percentDataElements)+"%");
+
+					getMaps();	
+				}
+			
+
 				//doing lookups,analysing the dapercentDataElementstapercentDataElementsopulateArray();
 				function stats() 
 				{
