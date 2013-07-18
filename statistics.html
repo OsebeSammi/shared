@@ -31,6 +31,8 @@
 				var indicatorsNo,indicatorsUsedNo,indicatorsNotUsedNo;
 				var myIndex=0;
 
+				//clickable indicators and data elements
+				var indicatorsClickable,dataElementsClickable;
 
 				
 
@@ -56,27 +58,30 @@
 									
 									indicatorsArray.push(data.name);
 					
-								});
+								});indicatorsUsed
 						});
 				}
 
 			//function for charts
 				function getCharts()
-				{
+				{	
+					document.getElementById("indicatorsUsed").style.display="";
 					//getting data from charts and analysing
 					$.get("../api/charts.json",function(charts)
 						{						
 									
 							$(charts.charts).each(function(i,myCharts)
 								{
+									var linkCharts=myCharts.href+"/data";
 									$.get(myCharts.href+".json",function(data)
 										{	
 											$(data.indicators).each(function(i,data)
 												{
 														if(indicatorsUsedArray.indexOf(data.name)==-1)
-														{
-															indicatorsUsedArray.push(data.name);
-
+														{	
+											indicatorsUsedArray.push(data.name);
+											indicatorsClickable="<p id='"+linkCharts+"' onclick='show(id);'>"+data.name+"</p>";
+											$("#indicatorsUsed").append(indicatorsClickable);
 														}
 												});
 											
@@ -95,12 +100,14 @@
 						{	
 							$(maps.mapViews).each(function(i,myMaps)
 								{
+									var linkMaps=myMaps.href+"/data";
 									$.get(myMaps.href+".json",function(data)
 										{
 													if(indicatorsUsedArray.indexOf(data.name)==-1)
 														{
-															indicatorsUsedArray.push(data.name);
-															
+											indicatorsUsedArray.push(data.name);
+											indicatorsClickable="<p id='"+linkMaps+"' onclick='show(id);'>"+data.name+"</p>";
+											$("#indicatorsUsed").append(indicatorsClickable);	
 														}
 										});
 								});
@@ -110,6 +117,7 @@
 				//getting dATa elements from report tables
 				function getReportTables()
 				{
+					document.getElementById("dataElementsUsed").style.display="";
 					//getting data from report tables and analysing
 
 					$.get("../api/reportTables.json",function(reports)
@@ -117,13 +125,15 @@
 							$(reports.reportTables).each(function(i,myReports)
 								{
 									$.get(myReports.href+".json",function(data)
-										{
+										{	
+											var dataElementName=data.name;
 											$(data.dataElements).each(function(i,data)
 												{
 													if(dataElementsUsedArray.indexOf(data.name)==-1)
 														{
-															dataElementsUsedArray.push(data.name);
-
+									dataElementsUsedArray.push(data.name);
+									dataElementsClickable="<p id='"+dataElementName+"' onclick='show(id);'>"+data.name+"</p>";
+									$("#dataElementsUsed").append(dataElementsClickable);
 														}
 												});	
 										});
@@ -142,12 +152,14 @@
 								{
 									$.get(mySections.href+".json",function(data)
 										{
+											var sectionName=data.name;
 											$(data.dataElements).each(function(i,data)
 												{
 													if(dataElementsUsedArray.indexOf(data.name)==-1)
 														{
-															dataElementsUsedArray.push(data.name);
-
+								dataElementsUsedArray.push(data.name);
+								dataElementsClickable="<p id='"+sectionName+"' onclick='show(id);'>"+data.name+"</p>";
+								$("#dataElementsUsed").append(dataElementsClickable);
 														}
 												});	
 										});
@@ -166,7 +178,22 @@
 				getSections();
 			});
 
-		$(document).ajaxStop(function(){alert("works");});
+		$(document).ajaxStop(function()
+			{
+				
+				/*document.getElementById("indicatorsNotUsed").style.display="";
+				document.getElementById("dataElementsNotUsed").style.display="";
+
+				$().each(function(i,myIndicator)
+					{
+						$("#indicatorsNotUsed").append(myIndicator+"<br>");
+					});
+
+				$().each(function(i,myDataElements)
+					{
+						$("#dataElementsNotUsed").append(myIndicator+"<br>");
+					});*/
+			});
 
 
 				
@@ -207,16 +234,22 @@
 		<h2 style="text-align:center;">Statistical analysis of usage of indicators and data elements</h2>
 		
 		<button onclick="javascript:getSections();">RUN</button>
-<div id="totals">
-	<span id="indicators" style="font-size:40px;"></span> &nbsp&nbsp&nbsp		
-	<span id="dataElements" style="font-size:40px;"></span>
-</div>
-<div id="used" style="width:30%;">
-
+<div id="indicatorsUsed" style="display:none;">
+<h3>Used Indicators</h3>
 </div>
 
-<div id="notUsed" style="width:30%;">
+<div id="indicatorsNotUsed" style="display:none;">
+<h3>Indicators that are not used</h3>
 </div>
-<div id="more" style="width:30%;">
+
+<div id="dataElementsUsed" style="display:none;">
+Indicators that are not used
+</div>
+
+<div id="dataElementsNotUsed" style="display:none;">
+Indicators that are not used
+</div>
+
+<div id="more" style="display:none">
 
 </div>
