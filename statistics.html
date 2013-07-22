@@ -1,17 +1,18 @@
 
 		<style>
-			h3
-			{
-				text-align: center;
-				
-			}
-
 			button
 			{
 				width: 25%;
 				height: 100px;
 				position: relative;
 				left: 37%;
+			}
+			.divBorder
+			{
+				border-radius: 10px;
+				box-shadow: 2px 2px 2px 2px #008AE6;
+				margin:5px;
+				padding:5px;
 			}
 		</style>
 
@@ -34,53 +35,65 @@
 				//clickable indicators and data elements
 				var indicatorsClickable,dataElementsClickable;
 
+				//totals
+				var totalIndicators=1;
+				var totalDataElements=1;
+
 				
 
 					
 
+				var page=0;
 	//$(document).ready(function()}{});
 			//getting a list of all indicators and data elements
 				function populateArray()
 				{
-					$.get("../api/dataElements.json",function(dataElements)
-						{ 
+					
+					for(page=1;page<12;page++)
+					{	
+						$.get("../api/dataElements.json?page="+page,function(dataElements)
+						{
 							$(dataElements.dataElements).each(function(i,data)
 							{
 								dataElementsArray.push(data.name);
-						
+								
 							});
 						});
+					}	
+				
 
 					$.get("../api/indicators.json",function(indicators)
-						{	
+						{
 							$(indicators.indicators).each(function(i,data)
 								{
 									
 									indicatorsArray.push(data.name);
-					
-								});indicatorsUsed
+									
+								});
 						});
+					
 				}
 
 			//function for charts
 				function getCharts()
 				{	
-					document.getElementById("indicatorsUsed").style.display="";
+					
 					//getting data from charts and analysing
 					$.get("../api/charts.json",function(charts)
 						{						
 									
 							$(charts.charts).each(function(i,myCharts)
 								{
-									var linkCharts=myCharts.href+"/data";
+									
 									$.get(myCharts.href+".json",function(data)
 										{	
+											var chartClick=data.name
 											$(data.indicators).each(function(i,data)
 												{
 														if(indicatorsUsedArray.indexOf(data.name)==-1)
 														{	
 											indicatorsUsedArray.push(data.name);
-											indicatorsClickable="<p id='"+linkCharts+"' onclick='show(id);'>"+data.name+"</p>";
+											indicatorsClickable="<p id='"+chartClick+"' onclick='showCharts(id);'>"+data.name+"</p>";
 											$("#indicatorsUsed").append(indicatorsClickable);
 														}
 												});
@@ -100,13 +113,13 @@
 						{	
 							$(maps.mapViews).each(function(i,myMaps)
 								{
-									var linkMaps=myMaps.href+"/data";
+									var linkMaps=myMaps.name;
 									$.get(myMaps.href+".json",function(data)
 										{
 													if(indicatorsUsedArray.indexOf(data.name)==-1)
 														{
-											indicatorsUsedArray.push(data.name);
-											indicatorsClickable="<p id='"+linkMaps+"' onclick='show(id);'>"+data.name+"</p>";
+										indicatorsUsedArray.push(data.name);
+										indicatorsClickable="<p id='"+linkMaps+"' onclick='showMaps(id);'>"+data.name+"</p>";
 											$("#indicatorsUsed").append(indicatorsClickable);	
 														}
 										});
@@ -117,7 +130,6 @@
 				//getting dATa elements from report tables
 				function getReportTables()
 				{
-					document.getElementById("dataElementsUsed").style.display="";
 					//getting data from report tables and analysing
 
 					$.get("../api/reportTables.json",function(reports)
@@ -132,7 +144,7 @@
 													if(dataElementsUsedArray.indexOf(data.name)==-1)
 														{
 									dataElementsUsedArray.push(data.name);
-									dataElementsClickable="<p id='"+dataElementName+"' onclick='show(id);'>"+data.name+"</p>";
+									dataElementsClickable="<p id='"+dataElementName+"' onclick='showReport(id);'>"+data.name+"</p>";
 									$("#dataElementsUsed").append(dataElementsClickable);
 														}
 												});	
@@ -158,7 +170,7 @@
 													if(dataElementsUsedArray.indexOf(data.name)==-1)
 														{
 								dataElementsUsedArray.push(data.name);
-								dataElementsClickable="<p id='"+sectionName+"' onclick='show(id);'>"+data.name+"</p>";
+								dataElementsClickable="<p id='"+sectionName+"' onclick='showSection(id);'>"+data.name+"</p>";
 								$("#dataElementsUsed").append(dataElementsClickable);
 														}
 												});	
@@ -172,32 +184,89 @@
 	
 		$(document).ready(function()
 			{
+				populateArray();
 				getCharts();
 				getMaps();
 				getReportTables();
 				getSections();
 			});
+		
+		
 
+		totalIndicators=indicatorsArray.length;
+		totalDataElements=dataElementsArray.length;
+
+		function stats()
+		{	
+
+			//dataElementsArray,indicatorsArray,dataElementsUsedArray,indicatorsUsedArray
+			$(indicatorsUsedArray).each(function(i,match)
+				{
+					myIndex=indicatorsArray.indexOf(match);
+					indicatorsArray.splice(myIndex,1);
+				});
+
+			$(indicatorsArray).each(function(i,indicator)
+				{
+					$("#indicatorsNotUsed").append(indicator+"<br>");
+				});
+
+			$(dataElementsUsedArray).each(function(i,match)
+				{
+					myIndex=dataElementsArray.indexOf(match);
+					dataElementsArray.splice(myIndex,1);
+					
+				});
+
+			if(dataElementsArray.length==0){alert("all data elements have been used");}
+
+			$(dataElementsArray).each(function(i,dataElement)
+				{
+					$("#dataElementsNotUsed").append(dataElement+"<br>");
+
+				});
+		}
+		
 		$(document).ajaxStop(function()
 			{
+				totalIndicators=indicatorsArray.length;
+				totalDataElements=dataElementsArray.length;
+
+				stats();
 				
-				/*document.getElementById("indicatorsNotUsed").style.display="";
-				document.getElementById("dataElementsNotUsed").style.display="";
+				var indicatorsUsedPercent,indicatorsNotUsedPercent,dataElementsUsedPercent,dataElementsNotUsedPercent;
+				
+				indicatorsUsedPercent=(indicatorsUsedArray.length/totalIndicators)*100;
+				indicatorsNotUsedPercent=100-indicatorsUsedPercent;
 
-				$().each(function(i,myIndicator)
-					{
-						$("#indicatorsNotUsed").append(myIndicator+"<br>");
-					});
+				dataElementsUsedPercent=(dataElementsUsedArray.length/totalDataElements)*100;
+				dataElementsNotUsedPercent=100-dataElementsUsedPercent;
 
-				$().each(function(i,myDataElements)
-					{
-						$("#dataElementsNotUsed").append(myIndicator+"<br>");
-					});*/
+				$("#indicatorsUsed").append("<p style='font-size:50px'>"+indicatorsUsedPercent+"%</p>");
+				$("#dataElementsUsed").append("<p style='font-size:50px'>"+dataElementsUsedPercent+"%</p>");
+				$("#indicatorsNotUsed").append("<p style='font-size:50px'>"+indicatorsNotUsedPercent+"%</p>");
+				$("#dataElementsNotUsed").append("<p style='font-size:50px'>"+dataElementsNotUsedPercent+"%</p>");
 			});
 
+		function showCharts(myId)
+		{	
+			alert("used in chart - "+myId);
+		}
 
+		function showMaps(myId)
+		{	
+			alert("Used in map - "+myId);
+		}
+
+		function showReport(myId)
+		{
+			alert("used in Report - "+myId);
+		}
 				
-			
+		function showSection(myId)
+		{
+			alert("Used in section - "+myId);
+		}	
 				
 		
 			
@@ -231,25 +300,28 @@
 		</script>
 
 	
-		<h2 style="text-align:center;">Statistical analysis of usage of indicators and data elements</h2>
+		<h1 style="text-align:center;">Statistical analysis of usage of indicators and data elements</h1>
+		<hr>
 		
-		<button onclick="javascript:getSections();">RUN</button>
-<div id="indicatorsUsed" style="display:none;">
-<h3>Used Indicators</h3>
+<div class="divBorder" id="indicatorsUsed" style="float:left;width:45%;">
+<h1><u>Used Indicators</u></h1>
 </div>
 
-<div id="indicatorsNotUsed" style="display:none;">
-<h3>Indicators that are not used</h3>
+<div class="divBorder" id="dataElementsUsed" style="float:left;width:45%;">
+<h1><u>Used data elements</u></h1>
 </div>
 
-<div id="dataElementsUsed" style="display:none;">
-Indicators that are not used
+
+<div class="divBorder" id="indicatorsNotUsed" style="float:left;width:45%;">
+<h1><u>Indicators that are not used</u></h1>
 </div>
 
-<div id="dataElementsNotUsed" style="display:none;">
-Indicators that are not used
+<div class="divBorder" id="dataElementsNotUsed" style="float:left;width:45%;">
+<h1><u>Data elements not used</u></h1>
 </div>
 
-<div id="more" style="display:none">
+
+
+<div id="more">
 
 </div>
